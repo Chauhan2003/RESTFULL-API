@@ -1,7 +1,8 @@
-const express = require('express')
+const express = require('express');
 const app = express();
-const dotenv = require('dotenv')
-const dbConnect = require('./db/dbConnect')
+const dotenv = require('dotenv');
+const dbConnect = require('./db/dbConnect');
+const UserData = require('./db/userModel');
 
 dotenv.config();
 
@@ -9,23 +10,39 @@ const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 
-let family = [
-    {"id": 1, "name": "Gagan Chauhan"},
-    {"id": 2, "name": "Sanjeev Chauhan"},
-    {"id": 3, "name": "Neetu Chauhan"},
-    {"id": 4, "name": "Ananya Chauhan"},
-];
+const startServer = async () => {
+    try {
+        await dbConnect();
 
-app.get('/', (req, res)=>{
-    res.send("Hello, Welcome To RESTFULL API");
-})
+        let family = [
+            {"id": 1, "name": "Gagan Chauhan"},
+            {"id": 2, "name": "Sanjeev Chauhan"},
+            {"id": 3, "name": "Neetu Chauhan"},
+            {"id": 4, "name": "Ananya Chauhan"},
+        ];
 
-app.get('/family', (req, res)=>{
-    res.json(family);
-})
+        app.get('/', (req, res) => {
+            res.send("Hello, Welcome To RESTFULL API");
+        });
 
-dbConnect();
+        app.get('/family', (req, res) => {
+            res.json(family);
+        });
 
-app.listen(PORT, ()=>{
-    console.log(`Server is started on PORT: ${PORT}`);
-})
+        const user1 = new UserData({
+            email: "gagan123@gmail.com",
+            password: "password"
+        });
+
+        await user1.save();
+        console.log("User data is inserted");
+
+        app.listen(PORT, () => {
+            console.log(`Server is started on PORT: ${PORT}`);
+        });
+    } catch (error) {
+        console.error("Error:", error);
+    }
+};
+
+startServer();
